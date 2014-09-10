@@ -155,6 +155,7 @@ namespace WinForms
         virtual void OnInitialized();
 
         virtual void Load(String^ url);
+        virtual void LoadWithoutCache(String^ url);
         virtual void LoadHtml(String^ html);
         virtual void LoadHtml(String^ html, String ^url);
         virtual void Stop();
@@ -188,5 +189,14 @@ namespace WinForms
 
         virtual void RegisterJsObject(String^ name, Object^ objectToBind);
         virtual IDictionary<String^, Object^>^ GetBoundObjects();
+
+        virtual void Find(int identifier, String^ searchText, bool forward, bool matchCase, bool findNext);
+        virtual void StopFinding(bool clearSelection);
+        virtual double GetZoomLevel();
+        virtual void SetZoomLevel(double zoomLevel);
+        virtual void SendKeyEvent(KeyType type, int key, BOOL sysChar, BOOL imeChar, int modifiers);
+        virtual void SendMouseClickEvent(int x, int y, int mouseButtonType, bool mouseUp, int clickCount);
+        virtual void SendMouseMoveEvent(int x, int y, bool mouseLeave);
+        virtual void SendMouseWheelEvent(int x, int y, int deltaX, int deltaY);
     };
 }}

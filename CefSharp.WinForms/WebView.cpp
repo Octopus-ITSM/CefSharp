@@ -93,8 +93,29 @@ namespace WinForms
 
         CefRefPtr<CefBrowser> browser;
         if (TryGetCefBrowser(browser))
-        {
+        {         
             browser->GetMainFrame()->LoadURL(toNative(url));
+        }
+    }
+
+    void WebView::LoadWithoutCache(String^ url)
+    {
+        _browserCore->CheckBrowserInitialization();
+        _browserCore->OnLoad();
+
+        CefRefPtr<CefBrowser> browser;
+        if (TryGetCefBrowser(browser))
+        {
+            CefRefPtr<CefRequest> request = CefRequest::CreateRequest();
+            request->SetURL(toNative(url));
+            request->SetMethod(toNative("GET"));
+            request->SetFlags((CefRequest::RequestFlags) (
+              (int)CefRequest::RequestFlags::WUR_FLAG_SKIP_CACHE | 
+              (int)CefRequest::RequestFlags::WUR_FLAG_REPORT_LOAD_TIMING | 
+              (int)CefRequest::RequestFlags::WUR_FLAG_REPORT_RAW_HEADERS |
+              (int)CefRequest::RequestFlags::WUR_FLAG_REPORT_UPLOAD_PROGRESS ));
+
+            browser->GetMainFrame()->LoadRequest(request);   
         }
     }
 
@@ -102,7 +123,6 @@ namespace WinForms
     {
         LoadHtml(html, "about:blank");
     }
-
     void WebView::LoadHtml(String^ html, String^ url)
     {
         _browserCore->CheckBrowserInitialization();
@@ -358,5 +378,75 @@ namespace WinForms
     IDictionary<String^, Object^>^ WebView::GetBoundObjects()
     {
         return _browserCore->GetBoundObjects();
+    }
+
+    void WebView::Find(int identifier, String^ searchText, bool forward, bool matchCase, bool findNext)
+    {
+      CefRefPtr<CefBrowser> cefBrowser;
+      if( TryGetCefBrowser(cefBrowser))
+      {
+        cefBrowser->Find(identifier, toNative(searchText), forward, matchCase, findNext);
+      }
+    }
+    void WebView::StopFinding(bool clearSelection)
+    { 
+      CefRefPtr<CefBrowser> cefBrowser;
+      if( TryGetCefBrowser(cefBrowser))
+      {
+        cefBrowser->StopFinding(clearSelection);
+      }
+    }
+    double WebView::GetZoomLevel()
+    {
+      CefRefPtr<CefBrowser> cefBrowser;
+      if( TryGetCefBrowser(cefBrowser))
+      {
+        return cefBrowser->GetZoomLevel();
+      }
+      return 0.0;
+    }
+    void WebView::SetZoomLevel(double zoomLevel)
+    {
+      CefRefPtr<CefBrowser> cefBrowser;
+      if( TryGetCefBrowser(cefBrowser))
+      {
+        cefBrowser->SetZoomLevel(zoomLevel);
+      }
+    }
+    void WebView::SendKeyEvent(KeyType type, int key, BOOL sysChar, BOOL imeChar, int modifiers)
+    {
+      CefRefPtr<CefBrowser> cefBrowser;
+      if( TryGetCefBrowser(cefBrowser))
+      {
+        CefKeyInfo cefKeyInfo;
+        cefKeyInfo.key = key;
+        cefKeyInfo.sysChar = sysChar;
+        cefKeyInfo.imeChar = imeChar;
+        cefBrowser->SendKeyEvent((CefBrowser::KeyType)type, cefKeyInfo, modifiers);
+      }
+    }
+    void WebView::SendMouseClickEvent(int x, int y, int mouseButtonType, bool mouseUp, int clickCount)
+    { 
+      CefRefPtr<CefBrowser> cefBrowser;
+      if( TryGetCefBrowser(cefBrowser))
+      {
+        cefBrowser->SendMouseClickEvent(x, y, (CefBrowser::MouseButtonType)mouseButtonType, mouseUp, clickCount);
+      }
+    }
+    void WebView::SendMouseMoveEvent(int x, int y, bool mouseLeave)
+    {
+      CefRefPtr<CefBrowser> cefBrowser;
+      if( TryGetCefBrowser(cefBrowser))
+      {
+        return cefBrowser->SendMouseMoveEvent(x, y, mouseLeave);
+      }
+    }
+    void WebView::SendMouseWheelEvent(int x, int y, int deltaX, int deltaY)
+    { 
+      CefRefPtr<CefBrowser> cefBrowser;
+      if( TryGetCefBrowser(cefBrowser))
+      {
+        return cefBrowser->SendMouseWheelEvent(x, y, deltaX, deltaY);
+      }
     }
 }}

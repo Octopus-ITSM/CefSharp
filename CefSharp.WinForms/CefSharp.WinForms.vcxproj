@@ -109,7 +109,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AssemblyInfo.cpp" />
     <ClCompile Include="..\CefSharp\StringUtil.cpp" />
     <ClCompile Include="WebView.cpp" />
   </ItemGroup>
@@ -120,6 +119,9 @@
     <ProjectReference Include="..\CefSharp\CefSharp.vcxproj">
       <Project>{7b495581-2271-4f41-9476-acb86e8c864f}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\CefSharp\CefSharp.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

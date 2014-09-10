@@ -11,9 +11,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AssemblyInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\CefSharp\StringUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -25,5 +22,8 @@
     <ClInclude Include="WebView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\CefSharp\CefSharp.rc" />
   </ItemGroup>
 </Project>
