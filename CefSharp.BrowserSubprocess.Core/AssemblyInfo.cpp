@@ -13,6 +13,7 @@ using namespace CefSharp;
 //[assembly:AssemblyCopyright(AssemblyInfo::AssemblyCopyright)];
 
 [assembly:AssemblyVersion(AssemblyInfo::AssemblyVersion)];
+[assembly:AssemblyFileVersion(AssemblyInfo::AssemblyFileVersion)]
 [assembly:ComVisible(AssemblyInfo::ComVisible)];
 [assembly:CLSCompliant(AssemblyInfo::ClsCompliant)];
 
