@@ -253,6 +253,7 @@
     <ClInclude Include="ManagedCefBrowserAdapter.h" />
     <ClInclude Include="Internals\RequestResponse.h" />
     <ClInclude Include="CefSettings.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SchemeHandlerResponse.h" />
     <ClInclude Include="SchemeHandlerWrapper.h" />
     <ClInclude Include="Stdafx.h" />
@@ -273,6 +274,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
