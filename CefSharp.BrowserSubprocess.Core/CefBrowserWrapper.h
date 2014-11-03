@@ -36,14 +36,14 @@ namespace CefSharp
 
         ~CefBrowserWrapper()
         {
-			_cefBrowser = nullptr;
+            _cefBrowser = nullptr;
         }
 
         property int BrowserId;
         property bool IsPopup;
-		property DuplexChannelFactory<IBrowserProcess^>^ ChannelFactory;
-		property JavascriptRootObject^ JavascriptRootObject;
-		property Func<IBrowserProcess^>^ CreateBrowserProxyDelegate;
+        property DuplexChannelFactory<IBrowserProcess^>^ ChannelFactory;
+        property JavascriptRootObject^ JavascriptRootObject;
+        property Func<IBrowserProcess^>^ CreateBrowserProxyDelegate;
 
         JavascriptResponse^ EvaluateScriptInContext(CefRefPtr<CefV8Context> context, CefString script)
         {
