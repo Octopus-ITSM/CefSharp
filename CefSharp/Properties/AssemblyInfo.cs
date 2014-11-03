@@ -29,6 +29,11 @@ namespace CefSharp
 {
     public static class AssemblyInfo
     {
+        /*
+         *  WARNING : Any change made here must be replicated in the following c++ resource files :
+         *      - CefSharp.BrowserSubprocess.Core\Resource.rc
+         *      - CefSharp.Core\Resource.rc
+         */
         public const bool ClsCompliant = false;
         public const bool ComVisible = false;
         public const string AssemblyCompany = "The CefSharp Authors";
