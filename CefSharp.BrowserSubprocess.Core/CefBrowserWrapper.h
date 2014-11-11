@@ -22,7 +22,7 @@ namespace CefSharp
     // "Master class" for wrapping everything that the CefSubprocess needs.
     public ref class CefBrowserWrapper : DisposableResource
     {
-    
+
     private:
         MCefRefPtr<CefBrowser> _cefBrowser;
 
@@ -43,7 +43,7 @@ namespace CefSharp
         property bool IsPopup;
 		property DuplexChannelFactory<IBrowserProcess^>^ ChannelFactory;
         property JavascriptRootObject^ JavascriptRootObject;
-		property IBrowserProcess^ BrowserProcess;
+        property IBrowserProcess^ BrowserProcess;
 
         JavascriptResponse^ EvaluateScriptInContext(CefRefPtr<CefV8Context> context, CefString script)
         {
