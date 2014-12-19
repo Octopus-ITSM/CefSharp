@@ -13,6 +13,7 @@ namespace CefSharp.WinForms
     public class ChromiumWebBrowser : Control, IWebBrowserInternal, IWinFormsWebBrowser
     {
         private ManagedCefBrowserAdapter managedCefBrowserAdapter;
+        private ChromiumWebBrowserMessageInterceptor messageInterceptor;
 
         public BrowserSettings BrowserSettings { get; set; }
         public string Title { get; set; }
@@ -27,7 +28,6 @@ namespace CefSharp.WinForms
         public IDownloadHandler DownloadHandler { get; set; }
         public ILifeSpanHandler LifeSpanHandler { get; set; }
         public IMenuHandler MenuHandler { get; set; }
-        public IFocusHandler FocusHandler { get; set; }
 
         public bool CanGoForward { get; private set; }
         public bool CanGoBack { get; private set; }
@@ -57,7 +57,7 @@ namespace CefSharp.WinForms
 
             Dock = DockStyle.Fill;
 
-            FocusHandler = new DefaultFocusHandler(this);
+            messageInterceptor = new ChromiumWebBrowserMessageInterceptor(this, OnCefWindowMessage);
         }
 
         protected override void Dispose(bool disposing)
@@ -71,6 +71,13 @@ namespace CefSharp.WinForms
                     managedCefBrowserAdapter.Dispose();
                     managedCefBrowserAdapter = null;
                 }
+
+                if( messageInterceptor != null )
+                {
+                    messageInterceptor.Dispose();
+                    messageInterceptor = null;
+                }
+
             }
             base.Dispose(disposing);
         }
@@ -343,6 +350,32 @@ namespace CefSharp.WinForms
             return taskStringVisitor.Task;
         }
 
+        /// <summary>
+        /// Manually implement Focused because cef does not implement it.
+        /// </summary>
+        /// <remarks>
+        /// This is also how the Microsoft's WebBrowserControl implements the Focused property.
+        /// </remarks>
+        public override bool Focused
+        {
+            get
+            {
+                if (base.Focused)
+                {
+                    return true;
+                }
+
+                if (!IsHandleCreated)
+                {
+                    return false;
+                }
+
+                // Ask Windows which control has the focus and then check if it's one of our children
+                IntPtr focus = User32.GetFocus();
+                return focus != IntPtr.Zero && User32.IsChild(Handle, focus);
+            }
+        }
+
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
@@ -354,6 +387,58 @@ namespace CefSharp.WinForms
             if (IsBrowserInitialized)
             {
                 managedCefBrowserAdapter.Resize(Width, Height);
+            }
+        }
+
+        public virtual void OnTakeFocus(bool next)
+        {
+            //Reminder: OnTakeFocus means leaving focus / not taking focus
+            BeginInvoke(new MethodInvoker(() => this.SelectNextControl(next)));
+        }
+
+        public virtual void OnGotFocus()
+        {
+            //Do nothing here because event is not fired property : we hook WM_SETFOCUS instead
+        }
+
+        public virtual bool OnSetFocus(CefFocusSource source)
+        {
+            if (source == CefFocusSource.FocusSourceNavigation)
+            {
+                return true; //Do not let the browser take focus when a Load method has been called
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+
+            //Notify browser we got focus from Windows Forms world
+            managedCefBrowserAdapter.SendFocusEvent(true);
+        }
+
+        protected virtual void OnCefWindowMessage(Message m)
+        {
+            if (m.Msg == 0x0007 /*WM_SETFOCUS*/)
+            {
+                BeginInvoke(new MethodInvoker(() => this.Activate()));
+            }
+        }
+
+        /// <summary>
+        /// Exposes Cef Window handle. Third party applications may want to send messages directly to this handle.
+        /// 
+        /// An example would be : prevent Drag'n'Drop using Win32 api : RevokeDragDrop(IntPtr hwnd)
+        /// </summary>
+        public IntPtr CefWindowHandle
+        {
+            get 
+            {
+                return messageInterceptor.Handle;
             }
         }
     }
