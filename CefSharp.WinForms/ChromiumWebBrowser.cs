@@ -60,6 +60,24 @@ namespace CefSharp.WinForms
             FocusHandler = new DefaultFocusHandler(this);
         }
 
+        protected override void OnLeave(EventArgs e)
+        {
+            base.OnLeave(e);
+      //      managedCefBrowserAdapter.SendFocusEvent(false);
+        }
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            base.OnLostFocus(e);
+      //      managedCefBrowserAdapter.SendFocusEvent(false);
+        }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+            managedCefBrowserAdapter.SendFocusEvent(true);
+        }
+
         protected override void Dispose(bool disposing)
         {
             Cef.RemoveDisposable(this);
@@ -341,6 +359,32 @@ namespace CefSharp.WinForms
             var taskStringVisitor = new TaskStringVisitor();
             managedCefBrowserAdapter.GetText(taskStringVisitor);
             return taskStringVisitor.Task;
+        }
+
+        /// <summary>
+        /// Manually implement Focused because cef does not implement it.
+        /// </summary>
+        /// <remarks>
+        /// This is also how the Microsoft's WebBrowserControl implements the Focused property.
+        /// </remarks>
+        public override bool Focused
+        {
+            get
+            {
+                if (base.Focused)
+                {
+                    return true;
+                }
+
+                if (!IsHandleCreated)
+                {
+                    return false;
+                }
+
+                // Ask Windows which control has the focus and then check if it's one of our children
+                IntPtr focus = User32.GetFocus();
+                return focus != IntPtr.Zero && User32.IsChild(Handle, focus);
+            }
         }
 
         protected override void OnSizeChanged(EventArgs e)
