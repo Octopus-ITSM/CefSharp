@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
@@ -36,9 +37,34 @@ namespace CefSharp.WinForms.Internals
         }
 
         private void _browser_IsBrowserInitializedChanged(object sender, IsBrowserInitializedChangedEventArgs e)
-        {
-            _browser.IsBrowserInitializedChanged -= _browser_IsBrowserInitializedChanged;
-            _browser.Invoke(new MethodInvoker(AssignHandle));
+        {            
+            try
+            {
+                _browser.IsBrowserInitializedChanged -= _browser_IsBrowserInitializedChanged;
+                _browser.Invoke(new MethodInvoker(AssignHandle));
+            }
+            catch (TargetInvocationException ex)
+            {
+                if (ex.InnerException is ObjectDisposedException)
+                {
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch
+            {
+               if( _browser == null )
+               {
+                  return;
+               }
+               
+               throw;
+            }
         }
 
         protected override void WndProc(ref Message m)
@@ -49,6 +75,8 @@ namespace CefSharp.WinForms.Internals
 
         public void Dispose()
         {
+            _browser.IsBrowserInitializedChanged -= _browser_IsBrowserInitializedChanged;
+
             ReleaseHandle();
             _browser = null;
             _onMessageCallback = null;
