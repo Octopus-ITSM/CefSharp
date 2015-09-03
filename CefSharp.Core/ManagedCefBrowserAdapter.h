@@ -34,7 +34,7 @@ namespace CefSharp
             _renderClientAdapter = nullptr;
             if (_browserProcessServiceHost != nullptr)
             {
-                _browserProcessServiceHost->Close();
+                _browserProcessServiceHost->Abort();
                 _browserProcessServiceHost = nullptr;
             }
 

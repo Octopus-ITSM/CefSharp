@@ -25,15 +25,21 @@ namespace CefSharp
 
             if (cefCookie.has_expires)
             {
-                cookie->Expires = DateTime(
-                    cefCookie.expires.year,
-                    cefCookie.expires.month,
-                    cefCookie.expires.day_of_month,
-                    cefCookie.expires.hour,
-                    cefCookie.expires.minute,
-                    cefCookie.expires.second,
-                    cefCookie.expires.millisecond
-                );
+                try 
+                {
+                    cookie->Expires = DateTime(
+                        cefCookie.expires.year,
+                        cefCookie.expires.month,
+                        cefCookie.expires.day_of_month,
+                        cefCookie.expires.hour,
+                        cefCookie.expires.minute,
+                        cefCookie.expires.second,
+                        cefCookie.expires.millisecond
+                        );
+                }
+                catch (ArgumentOutOfRangeException^)
+                {
+                }                
             }
         }
 
