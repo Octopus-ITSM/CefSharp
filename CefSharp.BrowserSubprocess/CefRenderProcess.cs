@@ -87,18 +87,25 @@ namespace CefSharp.BrowserSubprocess
         {
             browsers.Remove(browser);
 
-            var channelFactory = browser.ChannelFactory;
-
-            if (channelFactory.State == CommunicationState.Opened)
+            try
             {
-                channelFactory.Close();
+                var channelFactory = browser.ChannelFactory;
+
+                if (channelFactory.State == CommunicationState.Opened)
+                {
+                    channelFactory.Close();
+                }
+
+                var clientChannel = ((IClientChannel)browser.BrowserProcess);
+
+                if (clientChannel.State == CommunicationState.Opened)
+                {
+                    clientChannel.Close();
+                }
             }
-
-            var clientChannel = ((IClientChannel)browser.BrowserProcess);
-
-            if (clientChannel.State == CommunicationState.Opened)
+            catch
             {
-                clientChannel.Close();
+                //Ignore close exception
             }
 
             browser.ChannelFactory = null;
