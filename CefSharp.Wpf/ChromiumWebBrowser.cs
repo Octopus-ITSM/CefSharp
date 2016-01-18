@@ -57,6 +57,7 @@ namespace CefSharp.Wpf
         public event EventHandler<FrameLoadStartEventArgs> FrameLoadStart;
         public event EventHandler<FrameLoadEndEventArgs> FrameLoadEnd;
         public event EventHandler<LoadErrorEventArgs> LoadError;
+        public event EventHandler<LoadingStateChangedEventArgs> LoadingStateChanged;
 
         public ICommand BackCommand { get; private set; }
         public ICommand ForwardCommand { get; private set; }
@@ -662,20 +663,22 @@ namespace CefSharp.Wpf
             });
         }
 
-        void IWebBrowserInternal.SetIsLoading(bool isLoading)
-        {
-            UiThreadRunAsync(() => SetCurrentValue(IsLoadingProperty, isLoading));
-        }
-
-        void IWebBrowserInternal.SetNavState(bool canGoBack, bool canGoForward, bool canReload)
+        void IWebBrowserInternal.SetLoadingStateChange(bool canGoBack, bool canGoForward, bool isLoading)
         {
             UiThreadRunAsync(() =>
             {
                 SetCurrentValue(CanGoBackProperty, canGoBack);
                 SetCurrentValue(CanGoForwardProperty, canGoForward);
-                SetCurrentValue(CanReloadProperty, canReload);
+                SetCurrentValue(CanReloadProperty, !isLoading);
+                SetCurrentValue(IsLoadingProperty, isLoading);
 
                 RaiseCommandsCanExecuteChanged();
+
+                var handler = LoadingStateChanged;
+                if (handler != null)
+                {
+                    handler(this, new LoadingStateChangedEventArgs(this, canGoBack, canGoForward, isLoading));
+                }
             });
         }
 

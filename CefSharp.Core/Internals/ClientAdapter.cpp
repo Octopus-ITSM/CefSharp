@@ -66,8 +66,7 @@ namespace CefSharp
 
         void ClientAdapter::OnLoadingStateChange(CefRefPtr<CefBrowser> browser, bool isLoading, bool canGoBack, bool canGoForward)
         {
-            auto canReload = !isLoading;
-            _browserControl->SetNavState(canGoBack, canGoForward, canReload);
+            _browserControl->SetLoadingStateChange(canGoBack, canGoForward, isLoading);
         }
 
         void ClientAdapter::OnAddressChange(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& address)
@@ -163,11 +162,6 @@ namespace CefSharp
 
             AutoLock lock_scope(_syncRoot);
 
-            if (frame->IsMain())
-            {
-                _browserControl->SetIsLoading(true);
-            }
-
             _browserControl->OnFrameLoadStart(StringUtils::ToClr(frame->GetURL()), frame->IsMain());
         }
 
@@ -179,11 +173,6 @@ namespace CefSharp
             }
 
             AutoLock lock_scope(_syncRoot);
-
-            if (frame->IsMain())
-            {
-                _browserControl->SetIsLoading(false);
-            }
 
             _browserControl->OnFrameLoadEnd(StringUtils::ToClr(frame->GetURL()), frame->IsMain(), httpStatusCode);
         }
