@@ -7,6 +7,7 @@
 
 #include "JavascriptObjectWrapper.h"
 #include "CefAppWrapper.h"
+#include "ExceptionUtils.h"
 
 using namespace System;
 using namespace CefSharp::Internals;
@@ -53,23 +54,32 @@ namespace CefSharp
 		{
 			return _browserProcess->GetProperty(_object->Id, memberName);
 		}
-		catch (...)
-		{
-			auto messageString = String::Format("CefSharp::JavascriptObjectWrapper::GetProperty has failed: {0}", memberName);
+        catch (Exception^ ex)
+        {
+            auto parameters = gcnew array<Object^>(1);
+            parameters[0] = memberName;
 
-			if (!EventLog::SourceExists("CefSharp"))
-			{
-				EventLog::CreateEventSource("CefSharp", "Application");
-			}
-			auto entry = messageString->Length > 31500 ? messageString->Substring(0, 31500) : messageString;
-			EventLog::WriteEntry("CefSharp", entry, EventLogEntryType::Error, 0);
+            auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptObjectWrapper::GetProperty", ex, parameters);
 
-			auto response = gcnew BrowserProcessResponse();
-			response->Success = false;
-			response->Result = "";
-			response->Message = messageString;
-			return response;
-		}
+            auto response = gcnew BrowserProcessResponse();
+            response->Success = false;
+            response->Result = "";
+            response->Message = messageString;
+            return response;
+        }
+        catch (...)
+        {
+            auto parameters = gcnew array<Object^>(1);
+            parameters[0] = memberName;
+
+            auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptObjectWrapper::GetProperty", parameters);
+
+            auto response = gcnew BrowserProcessResponse();
+            response->Success = false;
+            response->Result = "";
+            response->Message = messageString;
+            return response;
+        }
 	};
 
 	BrowserProcessResponse^ JavascriptObjectWrapper::SetProperty(String^ memberName, Object^ value)
@@ -78,22 +88,33 @@ namespace CefSharp
 		{
 			return _browserProcess->SetProperty(_object->Id, memberName, value);
 		}
-		catch (...)
-		{
-			auto messageString = String::Format("CefSharp::JavascriptObjectWrapper::SetProperty has failed: {0}", memberName);
+        catch (Exception^ ex)
+        {
+            auto parameters = gcnew array<Object^>(2);
+            parameters[0] = memberName;
+            parameters[1] = value;
 
-			if (!EventLog::SourceExists("CefSharp"))
-			{
-				EventLog::CreateEventSource("CefSharp", "Application");
-			}
-			auto entry = messageString->Length > 31500 ? messageString->Substring(0, 31500) : messageString;
-			EventLog::WriteEntry("CefSharp", entry, EventLogEntryType::Error, 0);
+            auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptObjectWrapper::SetProperty", ex, parameters);
 
-			auto response = gcnew BrowserProcessResponse();
-			response->Success = false;
-			response->Result = "";
-			response->Message = messageString;
-			return response;
-		}
+            auto response = gcnew BrowserProcessResponse();
+            response->Success = false;
+            response->Result = "";
+            response->Message = messageString;
+            return response;
+        }
+        catch (...)
+        {
+            auto parameters = gcnew array<Object^>(2);
+            parameters[0] = memberName;
+            parameters[1] = value;
+
+            auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptObjectWrapper::SetProperty", parameters);
+
+            auto response = gcnew BrowserProcessResponse();
+            response->Success = false;
+            response->Result = "";
+            response->Message = messageString;
+            return response;
+        }
 	};
 }

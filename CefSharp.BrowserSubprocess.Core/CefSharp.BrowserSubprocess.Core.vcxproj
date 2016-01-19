@@ -157,6 +157,7 @@
     <ClInclude Include="CefAppWrapper.h" />
     <ClInclude Include="CefBrowserWrapper.h" />
     <ClInclude Include="CefTaskScheduler.h" />
+    <ClInclude Include="ExceptionUtils.h" />
     <ClInclude Include="JavascriptMethodWrapper.h" />
     <ClInclude Include="JavascriptMethodHandler.h" />
     <ClInclude Include="JavascriptObjectWrapper.h" />

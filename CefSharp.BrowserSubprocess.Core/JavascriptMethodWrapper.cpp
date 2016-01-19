@@ -6,9 +6,11 @@
 #include "Stdafx.h"
 
 #include "JavascriptMethodWrapper.h"
+#include "ExceptionUtils.h"
 #include "CefAppWrapper.h"
 
 using namespace System;
+using namespace CefSharp::Internals;
 using namespace System::Diagnostics;
 
 namespace CefSharp
@@ -27,16 +29,19 @@ namespace CefSharp
 		{
 			return _browserProcess->CallMethod(_ownerId, _javascriptMethod->JavascriptName, parameters);
 		}
+        catch (Exception^ ex)
+        {
+            auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptMethodWrapper::Execute", ex, parameters);
+
+            auto response = gcnew BrowserProcessResponse();
+            response->Success = false;
+            response->Result = "";
+            response->Message = messageString;
+            return response;
+        }
 		catch (...)
 		{
-			auto messageString = String::Format("CefSharp::JavascriptMethodWrapper::Execute has failed: {0}", String::Join("\r\n", parameters));
-
-			if (!EventLog::SourceExists("CefSharp"))
-			{
-				EventLog::CreateEventSource("CefSharp", "Application");
-			}
-			auto entry = messageString->Length > 31500 ? messageString->Substring(0, 31500) : messageString;
-			EventLog::WriteEntry("CefSharp", entry, EventLogEntryType::Error, 0);
+            auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptMethodWrapper::Execute", parameters);
 
 			auto response = gcnew BrowserProcessResponse();
 			response->Success = false;
