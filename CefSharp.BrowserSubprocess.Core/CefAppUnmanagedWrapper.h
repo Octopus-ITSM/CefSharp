@@ -13,6 +13,7 @@
 #include "CefAppWrapper.h"
 
 using namespace System::Collections::Generic;
+using namespace System::Collections::Concurrent;
 
 namespace CefSharp
 {
@@ -21,7 +22,7 @@ namespace CefSharp
     private:
         gcroot<Action<CefBrowserWrapper^>^> _onBrowserCreated;
         gcroot<Action<CefBrowserWrapper^>^> _onBrowserDestroyed;
-        gcroot<Dictionary<int, CefBrowserWrapper^>^> _browserWrappers;
+        gcroot<ConcurrentDictionary<int, CefBrowserWrapper^>^> _browserWrappers;
         CefBrowserWrapper^ FindBrowserWrapper(CefRefPtr<CefBrowser> browser, bool mustExist);
     public:
         
@@ -29,7 +30,7 @@ namespace CefSharp
         {
             _onBrowserCreated = onBrowserCreated;
             _onBrowserDestroyed = onBrowserDestoryed;
-            _browserWrappers = gcnew Dictionary<int, CefBrowserWrapper^>();
+            _browserWrappers = gcnew ConcurrentDictionary<int, CefBrowserWrapper^>();
         }
 
         ~CefAppUnmanagedWrapper()
