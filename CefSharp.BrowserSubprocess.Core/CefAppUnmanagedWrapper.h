@@ -22,15 +22,21 @@ namespace CefSharp
     private:
         gcroot<Action<CefBrowserWrapper^>^> _onBrowserCreated;
         gcroot<Action<CefBrowserWrapper^>^> _onBrowserDestroyed;
-        gcroot<ConcurrentDictionary<int, CefBrowserWrapper^>^> _browserWrappers;
-        CefBrowserWrapper^ FindBrowserWrapper(CefRefPtr<CefBrowser> browser, bool mustExist);
+        gcroot<List<CefBrowserWrapper^>^> _browserWrappers;
+        gcroot<Object^> _sync;
+
+        CefBrowserWrapper^ Find(CefRefPtr<CefBrowser> browser);
+        void Add(CefBrowserWrapper^ browser);
+        CefBrowserWrapper^ Remove(CefRefPtr<CefBrowser> browser);
+
     public:
         
         CefAppUnmanagedWrapper(Action<CefBrowserWrapper^>^ onBrowserCreated, Action<CefBrowserWrapper^>^ onBrowserDestoryed)
         {
             _onBrowserCreated = onBrowserCreated;
             _onBrowserDestroyed = onBrowserDestoryed;
-            _browserWrappers = gcnew ConcurrentDictionary<int, CefBrowserWrapper^>();
+            _browserWrappers = gcnew List<CefBrowserWrapper^>();
+            _sync = gcnew Object();
         }
 
         ~CefAppUnmanagedWrapper()
@@ -38,6 +44,7 @@ namespace CefSharp
             delete _browserWrappers;
             delete _onBrowserCreated;
             delete _onBrowserDestroyed;
+            delete _sync;
         }
 
         virtual DECL CefRefPtr<CefRenderProcessHandler> GetRenderProcessHandler() OVERRIDE;

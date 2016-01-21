@@ -21,11 +21,14 @@ namespace CefSharp
             {
                 try
                 {
-                    auto messageString = String::Format("{0} error\r\n{1}\r\nStack Trace: {2}\r\nJS Params:{3}", 
-                                            method, 
-                                            GetExceptionMessage(exception, 0), 
-                                            exception->StackTrace, 
-                                            String::Join("\r\n", parameters));
+                    auto assemblyFullPath = System::Reflection::Assembly::GetEntryAssembly()->Location;
+
+                    auto messageString = String::Format("{0}\r\n{1} error\r\n{2}\r\nStack Trace: {3}\r\nJS Params:{4}", 
+                                                        assemblyFullPath,
+                                                        method, 
+                                                        GetExceptionMessage(exception, 0), 
+                                                        exception->StackTrace, 
+                                                        String::Join("\r\n", parameters));
 
                     WriteLogEntry(messageString);
 
@@ -41,7 +44,9 @@ namespace CefSharp
             {
                 try
                 {
-                    auto messageString = String::Format("{0} error\r\n{1}", method, String::Join("\r\n", parameters));
+                    auto assemblyFullPath = System::Reflection::Assembly::GetEntryAssembly()->Location;
+                   
+                    auto messageString = String::Format("{0}\r\n{1} error\r\n{2}", assemblyFullPath, method, String::Join("\r\n", parameters));
 
                     WriteLogEntry(messageString);
 

@@ -5,9 +5,12 @@
 
 #include "Stdafx.h"
 
+#include <msclr/lock.h>
+
 #include "CefAppWrapper.h"
 #include "CefBrowserWrapper.h"
 #include "CefAppUnmanagedWrapper.h"
+#include "ExceptionUtils.h"
 
 using namespace System;
 using namespace System::Diagnostics;
@@ -20,64 +23,117 @@ namespace CefSharp
         return this;
     };
 
-    // CefRenderProcessHandler
     void CefAppUnmanagedWrapper::OnBrowserCreated(CefRefPtr<CefBrowser> browser)
     {
-        auto wrapper = gcnew CefBrowserWrapper(browser);
-        _onBrowserCreated->Invoke(wrapper);
-
-        //Multiple CefBrowserWrappers created when opening popups
-        _browserWrappers->TryAdd(browser->GetIdentifier(), wrapper);
+        try
+        {
+            auto wrapper = gcnew CefBrowserWrapper(browser);
+            _onBrowserCreated->Invoke(wrapper);
+            Add(wrapper);
+        }
+        catch (Exception^ exception)
+        {
+            auto parameters = gcnew array<Object^>(1);
+            parameters[0] = String::Format("BrowserId:{0}", browser->GetIdentifier());
+            ExceptionUtils::HandleError("CefSharp::CefAppUnmanagedWrapper::OnBrowserCreated", exception, parameters);
+        }
     }
 
     void CefAppUnmanagedWrapper::OnBrowserDestroyed(CefRefPtr<CefBrowser> browser)
     {
-        CefBrowserWrapper^ wrapper;
-        if (_browserWrappers->TryRemove(browser->GetIdentifier(), wrapper))
+        try
         {
+            CefBrowserWrapper^ wrapper = Remove(browser);
             _onBrowserDestroyed->Invoke(wrapper);
             delete wrapper;
+        }
+        catch (Exception^ exception)
+        {
+            auto parameters = gcnew array<Object^>(1);
+            parameters[0] = String::Format("BrowserId:{0}", browser->GetIdentifier());
+            ExceptionUtils::HandleError("CefSharp::CefAppUnmanagedWrapper::OnBrowserDestroyed", exception, parameters);
         }
     };
 
     void CefAppUnmanagedWrapper::OnContextCreated(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context)
     {
-        auto wrapper = FindBrowserWrapper(browser, true);
-
-        if (wrapper->JavascriptRootObject != nullptr)
+        try
         {
-            auto window = context->GetGlobal();
+            auto wrapper = Find(browser);
 
-            wrapper->JavascriptRootObjectWrapper = gcnew JavascriptRootObjectWrapper(wrapper->JavascriptRootObject, wrapper->BrowserProcess);
+            if (wrapper->JavascriptRootObject != nullptr)
+            {
+                auto window = context->GetGlobal();
 
-            wrapper->JavascriptRootObjectWrapper->V8Value = window;
-            wrapper->JavascriptRootObjectWrapper->Bind();
+                wrapper->JavascriptRootObjectWrapper = gcnew JavascriptRootObjectWrapper(wrapper->JavascriptRootObject, wrapper->BrowserProcess);
+
+                wrapper->JavascriptRootObjectWrapper->V8Value = window;
+                wrapper->JavascriptRootObjectWrapper->Bind();
+            }
+        }
+        catch (Exception^ exception)
+        {
+            auto parameters = gcnew array<Object^>(1);
+            parameters[0] = String::Format("BrowserId:{0}", browser->GetIdentifier());
+            ExceptionUtils::HandleError("CefSharp::CefAppUnmanagedWrapper::OnContextCreated", exception, parameters);
         }
     };
 
     void CefAppUnmanagedWrapper::OnContextReleased(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefV8Context> context)
-    { 
-        auto wrapper = FindBrowserWrapper(browser, true);
-
-        if (wrapper->JavascriptRootObjectWrapper != nullptr)
+    {
+        try
         {
-            delete wrapper->JavascriptRootObjectWrapper;
-            wrapper->JavascriptRootObjectWrapper = nullptr;
+            auto wrapper = Find(browser);
+
+            if (wrapper->JavascriptRootObjectWrapper != nullptr)
+            {
+                delete wrapper->JavascriptRootObjectWrapper;
+                wrapper->JavascriptRootObjectWrapper = nullptr;
+            }
+        }
+        catch (Exception^ exception)
+        {
+            auto parameters = gcnew array<Object^>(1);
+            parameters[0] = String::Format("BrowserId:{0}", browser->GetIdentifier());
+            ExceptionUtils::HandleError("CefSharp::CefAppUnmanagedWrapper::OnContextReleased", exception, parameters);
         }
     };
 
-    CefBrowserWrapper^ CefAppUnmanagedWrapper::FindBrowserWrapper(CefRefPtr<CefBrowser> browser, bool mustExist)
+    void CefAppUnmanagedWrapper::Add(CefBrowserWrapper^ browser)
     {
-        auto browserId = browser->GetIdentifier();
-        CefBrowserWrapper^ wrapper = nullptr;
+        msclr::lock l(_sync);
 
-        _browserWrappers->TryGetValue(browserId, wrapper);
+        _browserWrappers->Add(browser);
+    };
 
-        if (mustExist && wrapper == nullptr)
+    CefBrowserWrapper^ CefAppUnmanagedWrapper::Remove(CefRefPtr<CefBrowser> browser)
+    {
+        msclr::lock l(_sync);
+
+        for each (CefBrowserWrapper^ var in static_cast<List<CefBrowserWrapper^>^>(_browserWrappers))
         {
-            throw gcnew InvalidOperationException(String::Format("Failed to identify BrowserWrapper in OnContextCreated. : {0}", browserId));
+            if (var->GetCefBrowser()->IsSame(browser))
+            {
+                _browserWrappers->Remove(var);
+                return var;
+            }
         }
 
-        return wrapper;
+        throw gcnew InvalidOperationException("Failed to identify BrowserWrapper");
+    };
+
+    CefBrowserWrapper^ CefAppUnmanagedWrapper::Find(CefRefPtr<CefBrowser> browser)
+    {
+        msclr::lock l(_sync);
+
+        for each (CefBrowserWrapper^ var in static_cast<List<CefBrowserWrapper^>^>(_browserWrappers))
+        {
+            if (var->GetCefBrowser()->IsSame(browser))
+            {
+                return var;
+            }
+        }
+
+        throw gcnew InvalidOperationException("Failed to identify BrowserWrapper");
     };
 }

@@ -46,6 +46,11 @@ namespace CefSharp
         property JavascriptRootObjectWrapper^ JavascriptRootObjectWrapper;
         property IBrowserProcess^ BrowserProcess;
 
+        MCefRefPtr<CefBrowser> GetCefBrowser()
+        {
+            return _cefBrowser;
+        }
+
         JavascriptResponse^ EvaluateScriptInContext(CefRefPtr<CefV8Context> context, CefString script)
         {
             CefRefPtr<CefV8Value> result;
