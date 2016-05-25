@@ -52,6 +52,17 @@ namespace CefSharp
 	{
 		try
 		{
+			auto clientChannel = (IClientChannel^)_browserProcess;
+
+			if (clientChannel->State != CommunicationState::Opened)
+			{
+				auto response = gcnew BrowserProcessResponse();
+				response->Success = false;
+				response->Result = "";
+				response->Message = "CefSharp::JavascriptMethodWrapper::Channel is not opened";
+				return response;
+			}
+
 			return _browserProcess->GetProperty(_object->Id, memberName);
 		}
         catch (Exception^ ex)
@@ -86,6 +97,17 @@ namespace CefSharp
 	{
 		try
 		{
+			auto clientChannel = (IClientChannel^)_browserProcess;
+
+			if (clientChannel->State != CommunicationState::Opened)
+			{
+				auto response = gcnew BrowserProcessResponse();
+				response->Success = false;
+				response->Result = "";
+				response->Message = "CefSharp::JavascriptMethodWrapper::Channel is not opened";
+				return response;
+			}
+
 			return _browserProcess->SetProperty(_object->Id, memberName, value);
 		}
         catch (Exception^ ex)

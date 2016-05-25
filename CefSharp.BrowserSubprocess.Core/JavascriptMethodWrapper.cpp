@@ -27,18 +27,29 @@ namespace CefSharp
 	{
 		try
 		{
+			auto clientChannel = (IClientChannel^)_browserProcess;
+
+			if (clientChannel->State != CommunicationState::Opened)
+			{
+				auto response = gcnew BrowserProcessResponse();
+				response->Success = false;
+				response->Result = "";
+				response->Message = "CefSharp::JavascriptMethodWrapper::Channel is not opened";
+				return response;
+			}
+
 			return _browserProcess->CallMethod(_ownerId, _javascriptMethod->JavascriptName, parameters);
 		}
-        catch (Exception^ ex)
-        {
-            auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptMethodWrapper::Execute", ex, parameters);
+		catch (Exception^ ex)
+		{
+			auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptMethodWrapper::Execute", ex, parameters);
 
-            auto response = gcnew BrowserProcessResponse();
-            response->Success = false;
-            response->Result = "";
-            response->Message = messageString;
-            return response;
-        }
+			auto response = gcnew BrowserProcessResponse();
+			response->Success = false;
+			response->Result = "";
+			response->Message = messageString;
+			return response;
+		}
 		catch (...)
 		{
             auto messageString = ExceptionUtils::HandleError("CefSharp::JavascriptMethodWrapper::Execute", parameters);
