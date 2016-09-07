@@ -333,21 +333,39 @@ namespace CefSharp
 
         void Cut()
         {
-            auto cefFrame = _renderClientAdapter->TryGetCefMainFrame(); 
-            
+            auto cefFrame = _renderClientAdapter->TryGetCefFocusedFrame();
+
             if (cefFrame != nullptr)
             {
                 cefFrame->Cut();
+            }
+            else
+            {
+                auto cefFrame = _renderClientAdapter->TryGetCefMainFrame();
+
+                if (cefFrame != nullptr)
+                {
+                    cefFrame->Cut();
+                }
             }
         }
 
         void Copy()
         {
-            auto cefFrame = _renderClientAdapter->TryGetCefMainFrame(); 
+            auto cefFrame = _renderClientAdapter->TryGetCefFocusedFrame();
 
             if (cefFrame != nullptr)
             {
                 cefFrame->Copy();
+            }
+            else
+            {
+                auto cefFrame = _renderClientAdapter->TryGetCefMainFrame();
+
+                if (cefFrame != nullptr)
+                {
+                    cefFrame->Copy();
+                }
             }
         }
 
@@ -382,11 +400,20 @@ namespace CefSharp
 
         void SelectAll()
         {
-            auto cefFrame = _renderClientAdapter->TryGetCefMainFrame();
+            auto cefFrame = _renderClientAdapter->TryGetCefFocusedFrame();
 
             if (cefFrame != nullptr)
             {
                 cefFrame->SelectAll();
+            }
+            else
+            {
+                auto cefFrame = _renderClientAdapter->TryGetCefMainFrame();
+
+                if (cefFrame != nullptr)
+                {
+                    cefFrame->SelectAll();
+                }
             }
         }
 
