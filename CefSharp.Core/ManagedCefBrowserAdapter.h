@@ -353,11 +353,20 @@ namespace CefSharp
 
         void Paste()
         {
-            auto cefFrame = _renderClientAdapter->TryGetCefMainFrame();
+            auto cefFrame = _renderClientAdapter->TryGetCefFocusedFrame();
 
             if (cefFrame != nullptr)
             {
                 cefFrame->Paste();
+            }
+            else
+            {
+                auto cefFrame = _renderClientAdapter->TryGetCefMainFrame();
+
+                if (cefFrame != nullptr)
+                {
+                    cefFrame->Paste();
+                }
             }
         }
 

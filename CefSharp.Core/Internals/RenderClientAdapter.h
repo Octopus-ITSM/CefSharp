@@ -126,6 +126,18 @@ namespace CefSharp
                 return cefBrowser->GetMainFrame();
             };
 
+            CefRefPtr<CefFrame> TryGetCefFocusedFrame()
+            {
+                auto cefBrowser = this->GetCefBrowser().get();
+
+                if (!cefBrowser)
+                {
+                    return nullptr;
+                }
+
+                return cefBrowser->GetFocusedFrame();
+            };
+
             void ShowDevTools()
             {
                 auto cefHost = TryGetCefHost();
